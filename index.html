@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Pages摄像头测试</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-top: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+        
+        .status-box {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .status-ready {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        
+        .status-active {
+            background: #cce5ff;
+            color: #004085;
+            border: 2px solid #b8daff;
+        }
+        
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        video {
+            width: 100%;
+            display: block;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 150px;
+            justify-content: center;
+        }
+        
+        .btn-start {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+        
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+        
+        .btn-stop {
+            background: linear-gradient(45deg, #f44336, #da190b);
+            color: white;
+        }
+        
+        .btn-stop:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
+        }
+        
+        .btn-switch {
+            background: linear-gradient(45deg, #2196F3, #0b7dda);
+            color: white;
+        }
+        
+        .btn-switch:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+        }
+        
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .instructions {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        .instructions h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .github-info {
+            background: #24292e;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            button {
+                min-width: 120px;
+                padding: 10px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>GitHub Pages摄像头测试</h1>
+            <p class="subtitle">通过GitHub Pages部署的HTTPS页面可以正常访问摄像头</p>
+        </header>
+        
+        <div id="statusMessage" class="status-box status-ready">
+            准备就绪 - 点击"开启摄像头"开始测试
+        </div>
+        
+        <div class="video-container">
+            <video id="videoElement" autoplay playsinline></video>
+        </div>
+        
+        <div class="controls">
+            <button id="startCamera" class="btn-start">
+                <span>📷</span> 开启摄像头
+            </button>
+            <button id="switchCamera" class="btn-switch" disabled>
+                <span>🔄</span> 切换摄像头
+            </button>
+            <button id="stopCamera" class="btn-stop" disabled>
+                <span>⏹️</span> 停止摄像头
+            </button>
+        </div>
+        
+        <div class="instructions">
+            <h3>GitHub Pages部署说明</h3>
+            <ol>
+                <li>将此文件保存为<code>index.html</code></li>
+                <li>上传到GitHub仓库</li>
+                <li>在仓库设置中启用GitHub Pages</li>
+                <li>通过<code>https://用户名.github.io/仓库名</code>访问</li>
+            </ol>
+        </div>
+        
+        <div class="github-info">
+            <strong>当前协议:</strong> <span id="protocolInfo">检测中...</span><br>
+            <strong>页面地址:</strong> <span id="pageUrl">检测中...</span>
+        </div>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const videoElement = document.getElementById('videoElement');
+        const startCameraBtn = document.getElementById('startCamera');
+        const switchCameraBtn = document.getElementById('switchCamera');
+        const stopCameraBtn = document.getElementById('stopCamera');
+        const statusMessage = document.getElementById('statusMessage');
+        const protocolInfo = document.getElementById('protocolInfo');
+        const pageUrl = document.getElementById('pageUrl');
+        
+        // 显示当前页面信息
+        protocolInfo.textContent = window.location.protocol;
+        pageUrl.textContent = window.location.href;
+        
+        let stream = null;
+        let currentFacingMode = 'user'; // 默认前置摄像头
+        
+        // 开启摄像头
+        startCameraBtn.addEventListener('click', async () => {
+            try {
+                statusMessage.textContent = '正在请求摄像头权限...';
+                statusMessage.className = 'status-box status-active';
+                
+                // 请求摄像头访问权限
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: currentFacingMode,
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } 
+                });
+                
+                // 将视频流绑定到video元素
+                videoElement.srcObject = stream;
+                
+                // 更新按钮状态
+                startCameraBtn.disabled = true;
+                switchCameraBtn.disabled = false;
+                stopCameraBtn.disabled = false;
+                
+                statusMessage.textContent = '摄像头已成功开启！GitHub Pages HTTPS环境正常工作。';
+                statusMessage.className = 'status-box status-active';
+                
+            } catch (error) {
+                console.error('摄像头访问错误:', error);
+                let errorMessage = '无法访问摄像头: ';
+                
+                switch(error.name) {
+                    case 'NotAllowedError':
+                        errorMessage += '用户拒绝了访问权限请求。请刷新页面重试并允许摄像头访问。';
+                        break;
+                    case 'NotFoundError':
+                        errorMessage += '未找到可用的摄像头设备。';
+                        break;
+                    case 'NotSupportedError':
+                        errorMessage += '当前环境不支持摄像头访问。GitHub Pages应该支持，请检查浏览器设置。';
+                        break;
+                    case 'NotReadableError':
+                        errorMessage += '摄像头正被其他应用程序使用。';
+                        break;
+                    default:
+                        errorMessage += error.message;
+                }
+                
+                statusMessage.textContent = errorMessage;
+                statusMessage.className = 'status-box status-error';
+                startCameraBtn.disabled = false;
+            }
+        });
+        
+        // 切换摄像头
+        switchCameraBtn.addEventListener('click', () => {
+            if (stream) {
+                // 停止当前流
+                stream.getTracks().forEach(track => track.stop());
+                
+                // 切换摄像头
+                currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+                
+                // 重新开启摄像头
+                startCameraBtn.click();
+            }
+        });
+        
+        // 停止摄像头
+        stopCameraBtn.addEventListener('click', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                videoElement.srcObject = null;
+                stream = null;
+                
+                startCameraBtn.disabled = false;
+                switchCameraBtn.disabled = true;
+                stopCameraBtn.disabled = true;
+                
+                statusMessage.textContent = '摄像头已关闭。可以重新开启测试。';
+                statusMessage.className = 'status-box status-ready';
+            }
+        });
+        
+        // 页面卸载前确保关闭摄像头
+        window.addEventListener('beforeunload', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        });
+    </script>
+</body>
+</html>
